@@ -12,7 +12,20 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": ["http://goload.pro/*", "https://goload.pro/*", "https://gogoanime.cm/*"]
+      },
+      "shell": {
+        "execute": true,
+        "open": true,
+        "scope": [{
+          "name": "vlc",
+          "cmd": "vlc",
+          "args": [{ "validator": "^https://"}, {"validator": "^--http-referrer=https?://" }]
+        }]
+      }
     },
     "bundle": {
       "active": true,
@@ -59,7 +72,9 @@
         "height": 600,
         "resizable": true,
         "title": "ani-cli-gui",
-        "width": 800
+        "width": 800,
+        "maxWidth": 1130,
+        "minWidth": 290
       }
     ]
   }

@@ -17,7 +17,10 @@
     "vite-plugin-solid": "^2.2.6"
   },
   "dependencies": {
+    "@suid/icons-material": "^0.2.3",
+    "@suid/material": "^0.4.1",
     "@tauri-apps/api": "^1.0.0-rc.6",
-    "solid-js": "^1.4.2"
+    "solid-js": "^1.4.2",
+    "typeface-roboto": "^1.1.13"
   }
 }
