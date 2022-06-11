@@ -15,6 +15,7 @@ import type { Component } from 'solid-js';
 import { createSignal, For, Show } from 'solid-js';
 import { extendedSearch, processSearch, searchAnime } from './api/searching';
 import { getVideoLink } from './api/url-processing';
+import { playEpisode } from './utils/video-playback';
 
 const App: Component = () => {
   const [loading, setLoading] = createSignal<boolean>(false);
@@ -26,7 +27,8 @@ const App: Component = () => {
   const onSearch = async () => {
     setLoading(true);
 
-    const results = await processSearch(searchValue());
+    const results =
+      (await processSearch(searchValue()).catch(console.error)) || [];
 
     setAnimes(results);
     setLoading(false);
@@ -34,7 +36,15 @@ const App: Component = () => {
 
   const onClickAnimeCard = async (animeId: string) => {
     setLoading(true);
-    await getVideoLink(animeId, 1).catch(console.error);
+    const videoLink = await getVideoLink(animeId, 1).catch(console.error);
+    console.log('video link', videoLink);
+    if (videoLink)
+      await playEpisode(
+        'vlc',
+        videoLink.link,
+        videoLink.refr,
+        `${animeId} episode 1`
+      );
     setLoading(false);
   };
 

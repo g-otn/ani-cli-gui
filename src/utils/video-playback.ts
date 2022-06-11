@@ -1,21 +1,23 @@
 import { Command, open } from '@tauri-apps/api/shell';
 
-export const playEpisode = (
+export const playEpisode = async (
   player: 'vlc' | 'mpv' | 'url' = 'url',
   url: string,
-  httpReferer: string
+  httpReferer: string,
+  title: string = 'ani-cli-gui'
 ) => {
-  let cmd: Command;
-
+  const safeTitle = title.replaceAll(/[^\w\d]/g, '_');
+  console.log(`playing ${safeTitle} on ${player}: ${url}`);
   switch (player) {
     case 'vlc':
-      cmd = new Command('vlc', [url, `--http-referrer=${httpReferer}`]);
-      cmd.spawn();
+      await new Command('vlc', [
+        url,
+        `--http-referrer=${httpReferer}`,
+        `--meta-title=${safeTitle}`,
+      ]).spawn();
       break;
     case 'mpv':
-      cmd = new Command('vlc', [url, `--http-referrer=${httpReferer}`]);
     default:
-      open(url);
-      break;
+      await open(url);
   }
 };

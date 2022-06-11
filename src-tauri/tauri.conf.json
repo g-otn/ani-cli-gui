@@ -15,7 +15,15 @@
       "http": {
         "all": true,
         "request": true,
-        "scope": ["http://goload.pro/*", "https://goload.pro/*", "https://gogoanime.cm/*"]
+        "scope": [
+          "http://goload.pro/*", 
+          "https://goload.pro/*", 
+          "https://gogoanime.cm/*", 
+          "http://dood.*/*", 
+          "https://dood.*/*", 
+          "http://fembed-hd.com/*", 
+          "https://fembed-hd.com/*"
+        ]
       },
       "shell": {
         "execute": true,
@@ -23,7 +31,11 @@
         "scope": [{
           "name": "vlc",
           "cmd": "vlc",
-          "args": [{ "validator": "^https://"}, {"validator": "^--http-referrer=https?://" }]
+          "args": [
+            { "validator": "^https://"}, 
+            {"validator": "^--http-referrer=https?://" }, 
+            {"validator": "^--meta-title=\\S+$"}
+          ]
         }]
       }
     },

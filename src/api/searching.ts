@@ -1,5 +1,6 @@
 import { getClient, ResponseType } from '@tauri-apps/api/http';
 import { agent, baseURL, extendedBaseURL } from '../utils/constants';
+import { getDoc } from '../utils/request-to-doc';
 
 /**
  * gets anime names along with its id for search term
@@ -7,16 +8,7 @@ import { agent, baseURL, extendedBaseURL } from '../utils/constants';
 export const searchAnime = async (search: string) => {
   const keyword = encodeURIComponent(search.replaceAll(' ', '-'));
 
-  const client = await getClient();
-
-  const doc = await client
-    .get<string>(`${baseURL}/search.html?keyword=${keyword}`, {
-      headers: { 'User-Agent': agent },
-      responseType: ResponseType.Text,
-    })
-    .then((res) => res.data)
-    .then((html) => new DOMParser().parseFromString(html, 'text/html'))
-    .catch(console.error);
+  const doc = await getDoc(`${baseURL}/search.html?keyword=${keyword}`);
 
   if (!doc) return [];
 
@@ -42,16 +34,7 @@ export const searchAnime = async (search: string) => {
 export const extendedSearch = async (search: string) => {
   const keyword = encodeURIComponent(search);
 
-  const client = await getClient();
-
-  const doc = await client
-    .get<string>(`${extendedBaseURL}/search.html?keyword=${keyword}`, {
-      headers: { 'User-Agent': agent },
-      responseType: ResponseType.Text,
-    })
-    .then((res) => res.data)
-    .then((html) => new DOMParser().parseFromString(html, 'text/html'))
-    .catch(console.error);
+  const doc = await getDoc(`${extendedBaseURL}/search.html?keyword=${keyword}`);
 
   if (!doc) return [];
 
