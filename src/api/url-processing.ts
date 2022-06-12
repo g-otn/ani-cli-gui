@@ -2,7 +2,7 @@ import { getClient, ResponseType } from '@tauri-apps/api/http';
 import { agent, baseURL } from '../utils/constants';
 import { getDoc, postDoc } from '../utils/request-to-doc';
 
-type Quality = '360' | '480' | '720' | '1080';
+export type Quality = '360' | '480' | '720' | '1080';
 
 const getDownloadPageLink = async (animeId: string, episodeNumber: number) => {
   const doc = await getDoc(
@@ -20,38 +20,32 @@ const getLinks = async (downloadPageURL: string) => {
 
   if (!doc) return null;
 
-  /**
-   * 0: goload.pro          |
-   * 1: sbplay2.xyz         | download
-   * 2: dood.ws             | best quality
-   * 4, 5, 6: mixdrop.co    | other quality
-   * 4: hydrax.net          |
-   * 5: fembed-hd.com       |
-   * 6: www.mp4upload.com   |
-   */
   return Array.from(
     doc.querySelectorAll<HTMLLIElement>('li[data-status="1"][data-video]')
   ).map((l) => l.dataset.video);
 };
 
-const generateLinkDood = async (links: string[]) => {
-  let doodId: string;
-  links.find((l) => {
-    doodId = l.match(/^https?:\/\/dood.\w+\/e\/(.+)$/)?.[1];
-    return doodId;
-  });
-  const refr = `https://dood.ws/d/${doodId}`;
+const generateLinkGoLoad = async (doc: Document) => {
+  // todo
+};
 
-  let doodLink: string;
-  if (doodId) {
-    const doodIdDoc = await getDoc(refr);
-    console.log('doodLinkDoc', doodIdDoc);
-    if (doodIdDoc) {
-    }
-  }
+const generateLinkDood = async (doodId: string) => {
+  console.log('generate dood', doodId);
+
+  const refr = `https://dood.to/e/${doodId}`;
+
+  const doodIdDoc = await getDoc(refr);
+
+  if (!doodIdDoc) return null;
+
+  const doodLink = doodIdDoc.querySelector<HTMLAnchorElement>(
+    'a[href^="/download]"'
+  ).href;
+
   await new Promise((res) => setTimeout(res, 500));
   if (doodLink) {
-    const doodLinkDoc = await getDoc(`https://dood.ws${doodLink}`);
+    const doodLinkDoc = await getDoc(`https://dood.to${doodLink}`);
+    console.log('doodlinddoc', doodLinkDoc);
   }
 };
 
@@ -70,15 +64,8 @@ const getVideoQualityMp4Fembed = (
   return link;
 };
 
-const generateLinkFembed = async (links: string[], quality: Quality) => {
-  let fbId: string;
-  links.find((l) => {
-    fbId = l.match(/^https?:\/\/fembed-hd\.com\/v\/(.+)$/)?.[1];
-    return fbId;
-  });
-  if (!fbId) return null;
-
-  const refr = `https://fembed-hd.com/v/${fbId}`;
+const generateLinkFembed = async (fbId: string, quality: Quality) => {
+  console.log('generate fembed', fbId, quality);
 
   const fbIdDoc = await postDoc(
     `https://fembed-hd.com/api/source/${fbId}`,
@@ -93,12 +80,34 @@ const generateLinkFembed = async (links: string[], quality: Quality) => {
   if (!fbIdDoc) return null;
 
   const data = JSON.parse(fbIdDoc.body.innerText)?.data;
-  console.log('fembed data:', data);
 
   if (!Array.isArray(data) || !data.length) return null;
 
   const link = getVideoQualityMp4Fembed(data, quality);
+  const refr = `https://fembed-hd.com/v/${fbId}`;
   return { link, refr };
+};
+
+const generateLinkMp4Upload = async (mp4UploadLink: string) => {
+  console.log('generate mp4upload', mp4UploadLink);
+
+  const doc = await getDoc(mp4UploadLink, {
+    headers: {
+      DNT: '1',
+    },
+  });
+
+  if (!doc) return null;
+
+  const script = Array.from(doc.querySelectorAll('script')).find((s) =>
+    s.innerText.startsWith('eval(function(p,a,c,k,e,d)')
+  );
+  const [, sub, ext, name, path, port] = script.innerText.match(
+    /embed\|(.+)\|.+blank.+\|(.+)\|(.+)\|(.+)\|(.+)\|src/
+  );
+  const link = `https://${sub}.mp4upload.com:${port}/d/${path}/${name}.${ext}`;
+
+  return { link, refr: mp4UploadLink };
 };
 
 export const getVideoLink = async (
@@ -113,10 +122,22 @@ export const getVideoLink = async (
 
   if (!links?.length) return null;
 
-  // let i = quality === 'best' ? 2 : 3;
-  // let resultLinks;
-  // while (i >= 1 && i <= 4 && !resultLinks) {
-  //   resultLinks = generateLink(links[i], i);
-  // }
-  return await generateLinkFembed(links, quality);
+  let videoLink;
+  let doodId, fbId, mp4UploadLink;
+  links.forEach((l) => {
+    if (!doodId) doodId = l.match(/^https?:\/\/dood.\w+\/e\/(.+)$/)?.[1];
+    if (!fbId) fbId = l.match(/^https?:\/\/fembed-hd\.com\/v\/(.+)$/)?.[1];
+    if (!mp4UploadLink)
+      mp4UploadLink = l.match(
+        /^https:\/\/www\.mp4upload\.com\/embed-.+\.html$/
+      )?.[0];
+  });
+
+  // if (doodId) videoLink = await generateLinkDood(doodId).catch(console.error);
+  if (!videoLink && fbId)
+    videoLink = await generateLinkFembed(fbId, quality).catch(console.error);
+  if (!videoLink && mp4UploadLink)
+    videoLink = await generateLinkMp4Upload(mp4UploadLink).catch(console.error);
+
+  return videoLink;
 };

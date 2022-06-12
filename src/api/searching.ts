@@ -2,6 +2,13 @@ import { getClient, ResponseType } from '@tauri-apps/api/http';
 import { agent, baseURL, extendedBaseURL } from '../utils/constants';
 import { getDoc } from '../utils/request-to-doc';
 
+export type Anime = {
+  id: string;
+  picture: string;
+  name: string;
+  numOfEpisodes: number;
+};
+
 /**
  * gets anime names along with its id for search term
  */
@@ -18,12 +25,14 @@ export const searchAnime = async (search: string) => {
 
   return Array.from(anchors)
     .map((a) => {
-      const [, id] = a.href.match(/\/videos\/(\S+)-episode-(\d+)$/);
+      const [, id, numOfEpisodes] = a.href.match(
+        /\/videos\/(\S+)-episode-(\d+)$/
+      );
       const img = a.querySelector<HTMLImageElement>('.picture img');
       const picture = img.src;
       const name = img.alt;
 
-      return { id, picture, name };
+      return { id, picture, name, numOfEpisodes: parseInt(numOfEpisodes) };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 };
@@ -54,7 +63,9 @@ export const extendedSearch = async (search: string) => {
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
-export const processSearch = async (search: string) => {
+export const processSearch: (search: string) => Promise<Anime[]> = async (
+  search
+) => {
   let results = (await searchAnime(search).catch(console.error)) || [];
 
   if (!results?.length) {
@@ -62,7 +73,7 @@ export const processSearch = async (search: string) => {
     // extended search has results of its own but we only use them to get the id and search again
     const extendedResults =
       (await extendedSearch(search).catch(console.error)) || [];
-    const firstExtendedResultId = extendedResults?.[0].id;
+    const firstExtendedResultId = extendedResults[0]?.id;
 
     if (firstExtendedResultId) {
       console.log(firstExtendedResultId, 'extended result found');
@@ -73,3 +84,8 @@ export const processSearch = async (search: string) => {
 
   return results;
 };
+
+// Check number of episodes in an anime
+// export const checkEpisode = async (animeId: string, numOfEpisodes: number) => {
+//   const doc = getDoc(`${baseURL}/videos/${animeId}-episode-${numOfEpisodes}`);
+// };

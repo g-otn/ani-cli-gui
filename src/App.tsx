@@ -1,50 +1,40 @@
 import SearchIcon from '@suid/icons-material/Search';
 import AppBar from '@suid/material/AppBar';
 import Box from '@suid/material/Box';
-import Card from '@suid/material/Card';
-import CardActionArea from '@suid/material/CardActionArea';
-import CardMedia from '@suid/material/CardMedia';
-import CircularProgress from '@suid/material/CircularProgress';
 import Container from '@suid/material/Container';
 import Grid from '@suid/material/Grid';
 import IconButton from '@suid/material/IconButton';
 import Input from '@suid/material/Input';
 import Toolbar from '@suid/material/Toolbar';
 import Typography from '@suid/material/Typography';
-import type { Component } from 'solid-js';
-import { createSignal, For, Show } from 'solid-js';
-import { extendedSearch, processSearch, searchAnime } from './api/searching';
-import { getVideoLink } from './api/url-processing';
-import { playEpisode } from './utils/video-playback';
+import { Component, createSignal, For, lazy, Show, Suspense } from 'solid-js';
+import { Anime, processSearch } from './api/searching';
+import AnimeCard from './components/AnimeCard';
+import Loading from './components/Loading';
+
+import icon from '../src-tauri/icons/32x32.png';
+
+const SelectionModal = lazy(() => import('./components/SelectionModal'));
 
 const App: Component = () => {
   const [loading, setLoading] = createSignal<boolean>(false);
+  const [error, setError] = createSignal<boolean>(false);
+
   const [searchValue, setSearchValue] = createSignal<string>(null);
-  const [animes, setAnimes] = createSignal<
-    Awaited<ReturnType<typeof searchAnime>>
-  >([]);
+  const [animes, setAnimes] = createSignal<Anime[]>(null);
+
+  const [selectedAnime, setSelectedAnime] = createSignal<Anime>(false);
 
   const onSearch = async () => {
+    setError(false);
     setLoading(true);
 
-    const results =
-      (await processSearch(searchValue()).catch(console.error)) || [];
+    const results = await processSearch(searchValue()).catch((err) => {
+      console.error(err);
+      setError(true);
+    });
 
-    setAnimes(results);
-    setLoading(false);
-  };
-
-  const onClickAnimeCard = async (animeId: string) => {
-    setLoading(true);
-    const videoLink = await getVideoLink(animeId, 1).catch(console.error);
-    console.log('video link', videoLink);
-    if (videoLink)
-      await playEpisode(
-        'vlc',
-        videoLink.link,
-        videoLink.refr,
-        `${animeId} episode 1`
-      );
+    if (results) setAnimes(results);
     setLoading(false);
   };
 
@@ -53,9 +43,16 @@ const App: Component = () => {
   return (
     <>
       <Box sx={{ display: 'grid' }} gridTemplateRows="auto 1fr" height="100vh">
-        <AppBar position="sticky">
-          <Toolbar sx={{ columnGap: 3, paddingTop: 1, paddingBottom: 1 }}>
-            <Typography variant="h6">ani-cli-gui</Typography>
+        <AppBar position="sticky" sx={{ backgroundColor: 'background.paper' }}>
+          <Toolbar
+            sx={{
+              columnGap: 3,
+              paddingTop: 1,
+              paddingBottom: 1,
+              alignItems: 'center',
+            }}
+          >
+            <Box component="img" src={icon} maxHeight={32} maxWidth={32} />
             <Input
               placeholder="Search anime"
               sx={{ flexGrow: 1 }}
@@ -78,65 +75,64 @@ const App: Component = () => {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Show when={loading()}>
-          <Box
-            sx={{ display: 'grid' }}
-            alignItems="center"
-            justifyContent="center"
+        <Suspense fallback={Loading}>
+          <Show when={!!selectedAnime()}>
+            <SelectionModal
+              animeId={selectedAnime().id}
+              numOfEpisodes={selectedAnime().numOfEpisodes}
+              onClose={() => setSelectedAnime(null)}
+            />
+          </Show>
+          <Show when={loading()}>
+            <Loading />
+          </Show>
+          <Show
+            when={!loading() && animes() !== null && animes()?.length === 0}
           >
-            <CircularProgress />
-          </Box>
-        </Show>
-        <Show when={!loading() && animes().length > 0}>
-          <Container>
-            <Grid
-              container
-              p={4}
-              spacing={3}
-              direction="row"
+            <Box
+              sx={{ display: 'grid' }}
               alignItems="center"
               justifyContent="center"
-              style={{ minHeight: '100vh' }}
             >
-              <For each={animes()}>
-                {(anime, i) => (
-                  <Grid item alignItems="center">
-                    <Card
-                      sx={{ width: 180 }}
-                      onClick={() => onClickAnimeCard(anime.id)}
-                    >
-                      <CardActionArea sx={{ height: '100%' }}>
-                        <Box
-                          height={252}
-                          sx={{ display: 'flex' }}
-                          justifyContent="center"
-                        >
-                          <CardMedia
-                            component="img"
-                            image={anime.picture}
-                            alt={anime.name}
-                          />
-                        </Box>
-                        <Box
-                          p={1}
-                          height={60}
-                          alignItems="center"
-                          justifyContent="center"
-                          textAlign="center"
-                          sx={{ display: 'grid' }}
-                        >
-                          <Typography variant="caption" overflow="hidden">
-                            {anime.name}
-                          </Typography>
-                        </Box>
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                )}
-              </For>
-            </Grid>
-          </Container>
-        </Show>
+              <Typography variant="h5">No results</Typography>
+            </Box>
+          </Show>
+          <Show when={error()}>
+            <Box
+              sx={{ display: 'grid' }}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography variant="h5" color="red">
+                Error
+              </Typography>
+            </Box>
+          </Show>
+          <Show when={!loading() && animes()?.length > 0}>
+            <Container>
+              <Grid
+                container
+                p={4}
+                spacing={3}
+                direction="row"
+                alignItems="center"
+                justifyContent="center"
+                style={{ minHeight: '100vh' }}
+              >
+                <For each={animes()}>
+                  {(anime, i) => (
+                    <Grid item alignItems="center">
+                      <AnimeCard
+                        anime={anime}
+                        onClick={() => setSelectedAnime(anime)}
+                      />
+                    </Grid>
+                  )}
+                </For>
+              </Grid>
+            </Container>
+          </Show>
+        </Suspense>
       </Box>
     </>
   );

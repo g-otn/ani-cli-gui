@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "ani-cli-gui",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
@@ -16,27 +16,37 @@
         "all": true,
         "request": true,
         "scope": [
-          "http://goload.pro/*", 
-          "https://goload.pro/*", 
-          "https://gogoanime.cm/*", 
-          "http://dood.*/*", 
-          "https://dood.*/*", 
-          "http://fembed-hd.com/*", 
-          "https://fembed-hd.com/*"
+          "http://goload.pro/*",
+          "https://goload.pro/*",
+          "https://gogoanime.cm/*",
+          "https://dood.to/*",
+          "https://fembed-hd.com/*",
+          "https://www.mp4upload.com/*"
         ]
       },
       "shell": {
         "execute": true,
         "open": true,
-        "scope": [{
-          "name": "vlc",
-          "cmd": "vlc",
-          "args": [
-            { "validator": "^https://"}, 
-            {"validator": "^--http-referrer=https?://" }, 
-            {"validator": "^--meta-title=\\S+$"}
-          ]
-        }]
+        "scope": [
+          {
+            "name": "vlc",
+            "cmd": "vlc",
+            "args": [
+              { "validator": "^https://" },
+              { "validator": "^--http-referrer=https?://" },
+              { "validator": "^--meta-title=\"[\\w\\d-]+ episode \\d+\"$" }
+            ]
+          },
+          {
+            "name": "mpv",
+            "cmd": "mpv",
+            "args": [
+              { "validator": "^https://" },
+              { "validator": "^--referrer=https?://" },
+              { "validator": "^--force-media-title=\"[\\w\\d-]+ episode \\d+\"$" }
+            ]
+          }
+        ]
       }
     },
     "bundle": {
@@ -81,12 +91,13 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
         "resizable": true,
         "title": "ani-cli-gui",
-        "width": 800,
+        "height": 775,
+        "minHeight": 200,
+        "width": 750,
         "maxWidth": 1130,
-        "minWidth": 290
+        "minWidth": 500
       }
     ]
   }

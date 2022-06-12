@@ -1,6 +1,6 @@
 {
   "name": "ani-cli-gui",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "description": "",
   "scripts": {
     "dev": "vite",
