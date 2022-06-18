@@ -23,7 +23,7 @@ const App: Component = () => {
   const [searchValue, setSearchValue] = createSignal<string>(null);
   const [animes, setAnimes] = createSignal<Anime[]>(null);
 
-  const [selectedAnime, setSelectedAnime] = createSignal<Anime>(false);
+  const [selectedAnime, setSelectedAnime] = createSignal<Anime>(null);
 
   const onSearch = async () => {
     setError(false);

@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "ani-cli-gui",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "tauri": {
     "allowlist": {
@@ -16,18 +16,24 @@
         "all": true,
         "request": true,
         "scope": [
-          "http://goload.pro/*",
-          "https://goload.pro/*",
-          "https://gogoanime.cm/*",
-          "https://dood.to/*",
-          "https://fembed-hd.com/*",
-          "https://www.mp4upload.com/*"
+          "http://*/*",
+          "https://*/*"
         ]
       },
       "shell": {
         "execute": true,
-        "open": true,
         "scope": [
+          {
+            "name": "curl-silent-headers",
+            "cmd": "curl",
+            "args": [
+              "-s",
+              { "validator": "^https?://" },
+              "-I",
+              "-A",
+              "\"Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/100.0\""
+            ]
+          },
           {
             "name": "vlc",
             "cmd": "vlc",

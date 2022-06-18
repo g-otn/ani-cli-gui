@@ -10,7 +10,7 @@ import { agent } from './constants';
 export const getDoc = async (url: string, options: RequestOptions = {}) => {
   const client = await getClient();
 
-  console.log('get', url);
+  console.debug('GET', url);
   return client
     .get<string>(url, {
       headers: { 'User-Agent': agent, ...(options?.headers || {}) },
@@ -28,7 +28,7 @@ export const postDoc = async (
 ) => {
   const client = await getClient();
 
-  console.log('post', url);
+  console.debug('POST', url);
   return client
     .post<string>(url, body, {
       headers: { 'User-Agent': agent, ...(options?.headers || {}) },

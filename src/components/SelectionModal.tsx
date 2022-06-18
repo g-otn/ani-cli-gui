@@ -27,9 +27,11 @@ const EpisodeSelectionModal: Component<{
     setError(null);
     setLoading(true);
 
-    const videoLink = await getVideoLink(animeId, episodeNumber).catch(
-      console.error
-    );
+    const videoLink = await getVideoLink(
+      animeId,
+      episodeNumber,
+      quality()
+    ).catch(console.error);
 
     if (!videoLink) {
       setError('Error getting video link');
@@ -41,7 +43,7 @@ const EpisodeSelectionModal: Component<{
       player(),
       videoLink.link,
       videoLink.refr,
-      `${animeId} episode 1`
+      `${animeId} episode ${episodeNumber}`
     ).catch((err) => {
       console.error(err);
       setError(
@@ -111,10 +113,12 @@ const EpisodeSelectionModal: Component<{
                 value={quality()}
                 onChange={(e, newQuality) => setQuality(newQuality)}
               >
+                <ToggleButton value="worst">worst</ToggleButton>
                 <ToggleButton value="360">360p</ToggleButton>
                 <ToggleButton value="480">480p</ToggleButton>
                 <ToggleButton value="720">720p</ToggleButton>
                 <ToggleButton value="1080">1080p</ToggleButton>
+                <ToggleButton value="best">best</ToggleButton>
               </ToggleButtonGroup>
             </Box>
             <Box sx={{ display: 'grid', rowGap: 1 }}>
@@ -123,7 +127,9 @@ const EpisodeSelectionModal: Component<{
                 <Index each={new Array(Math.ceil(numOfEpisodes / 10))}>
                   {(_, i) => (
                     <ButtonGroup variant="text">
-                      <Index each={new Array(Math.min(numOfEpisodes, 10))}>
+                      <Index
+                        each={new Array(Math.min(numOfEpisodes - i * 10, 10))}
+                      >
                         {(__, j) => {
                           const episodeNumber = i * 10 + (j + 1);
                           return (

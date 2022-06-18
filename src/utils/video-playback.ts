@@ -13,7 +13,7 @@ export const playEpisode = async (
   httpReferer: string,
   title: string = 'ani-cli-gui'
 ) => {
-  console.log(`playing ${title} on ${player}: ${url}`);
+  console.log(`Playing ${title} on ${player}: ${url}`);
 
   switch (player) {
     case 'vlc':

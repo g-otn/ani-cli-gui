@@ -13,6 +13,7 @@ export type Anime = {
  * gets anime names along with its id for search term
  */
 export const searchAnime = async (search: string) => {
+  console.log('Searching (Goload)');
   const keyword = encodeURIComponent(search.replaceAll(' ', '-'));
 
   const doc = await getDoc(`${baseURL}/search.html?keyword=${keyword}`);
@@ -41,6 +42,7 @@ export const searchAnime = async (search: string) => {
  * searches on gogoanime (instead of gogoplay) because they index english titles
  */
 export const extendedSearch = async (search: string) => {
+  console.log('Searching (Gogoanime)');
   const keyword = encodeURIComponent(search);
 
   const doc = await getDoc(`${extendedBaseURL}/search.html?keyword=${keyword}`);
