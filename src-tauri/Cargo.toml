@@ -1,6 +1,6 @@
 [package]
 name = "ani-cli-gui"
-version = "0.3.0"
+version = "0.4.0"
 description = "A desktop app to browse and play anime."
 authors = ["you"]
 license = "GPL-3.0"
@@ -17,7 +17,7 @@ tauri-build = { version = "1.0.0", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.0.0", features = ["http-all", "shell-execute"] }
+tauri = { version = "1.0.0", features = ["http-all", "shell-execute", "updater", "window-set-title"] }
 
 [features]
 # by default Tauri runs in production mode

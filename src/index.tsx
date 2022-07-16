@@ -6,6 +6,12 @@ import { render } from 'solid-js/web';
 
 import App from './App';
 import CssBaseline from '@suid/material/CssBaseline';
+import { appWindow } from '@tauri-apps/api/window';
+import { getName, getVersion } from '@tauri-apps/api/app';
+
+Promise.all([getName(), getVersion()])
+  .then(([name, version]) => appWindow.setTitle(`${name} v${version}`))
+  .catch(console.error);
 
 const darkTheme = createTheme({
   palette: {

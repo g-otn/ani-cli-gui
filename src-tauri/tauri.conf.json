@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "ani-cli-gui",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "tauri": {
     "allowlist": {
@@ -53,6 +53,10 @@
             ]
           }
         ]
+      },
+      "window": {
+        "all": false,
+        "setTitle": true
       }
     },
     "bundle": {
@@ -70,7 +74,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.gotn.ani-cli-gui",
+      "identifier": "com.g-otn.ani-cli-gui",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -80,7 +84,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "A desktop app to browse and play anime.",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -92,7 +96,12 @@
       "csp": null
     },
     "updater": {
-      "active": false
+      "active": true,
+      "endpoints": [
+        "https://gist.githubusercontent.com/g-otn/39a168b75a975c5ad945b6b3cc29a918/raw"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDQkVEMUQ4MjEwNjkwNDEKUldSQmtBWWgyTkcrbk5EK2JrdmR2eXRTTnpuT0s5SGRJUFlxbXhwUVJHd0JnaDh5am1sTmdlemMK",
+      "dialog": true
     },
     "windows": [
       {
